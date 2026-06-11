@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --background: #0d0e17;
+  --foreground: #e2e3e7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1a1c26; }
+::-webkit-scrollbar-thumb { background: #3d4050; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #12b7e8; }
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #12b7e8 0%, #7de4ff 50%, #3dd1f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-purple {
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f97316 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(18, 183, 232, 0.3), 0 0 60px rgba(18, 183, 232, 0.1);
+}
+
+.glow-blue-sm {
+  box-shadow: 0 0 10px rgba(18, 183, 232, 0.2);
+}
+
+/* Animated gradient border */
+.gradient-border {
+  position: relative;
+  background: linear-gradient(#0d0e17, #0d0e17) padding-box,
+              linear-gradient(135deg, #12b7e8, #7de4ff, #a855f7) border-box;
+  border: 1px solid transparent;
+}
+
+/* Neon border on hover */
+.neon-border {
+  transition: box-shadow 0.3s ease;
+}
+.neon-border:hover {
+  box-shadow: 0 0 0 1px rgba(18, 183, 232, 0.5), 0 0 20px rgba(18, 183, 232, 0.2);
+}
+
+/* Terminal styles */
+.terminal {
+  background: #0a0b10;
+  border: 1px solid #1e2030;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.terminal-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+/* Code highlight overrides */
+pre {
+  background: transparent !important;
+  margin: 0 !important;
+}
+
+/* Loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #1a1c26 25%, #282b38 50%, #1a1c26 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Custom checkbox */
+.custom-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #3d4050;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-checkbox:checked {
+  background: #12b7e8;
+  border-color: #12b7e8;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+}
+
+/* Agent log colors */
+.log-info    { color: #3dd1f9; }
+.log-success { color: #22c55e; }
+.log-warning { color: #f59e0b; }
+.log-error   { color: #ef4444; }
+.log-processing { color: #a855f7; }
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms, transform 300ms;
+}
