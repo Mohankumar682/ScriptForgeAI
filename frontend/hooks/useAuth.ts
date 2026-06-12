@@ -65,22 +65,38 @@ export const useAuth = create<AuthState>()(
       logout: () => {
         Cookies.remove('token')
         localStorage.removeItem('token')
+        localStorage.removeItem('scriptforge-auth')
         set({ user: null, token: null })
         window.location.href = '/login'
       },
 
       fetchMe: async () => {
+        const { token, logout } = get()
+        if (!token) {
+          logout()
+          return
+        }
         try {
           const res = await authAPI.me()
           set({ user: res.data })
         } catch {
-          get().logout()
+          logout()
         }
       },
     }),
     {
       name: 'scriptforge-auth',
       partialize: (state) => ({ user: state.user, token: state.token }),
+      // onRehydrateStorage: validate token is still in cookies/localStorage
+      onRehydrateStorage: () => (state) => {
+        if (state?.token) {
+          // Sync token to cookie in case it was cleared
+          const stored = typeof window !== 'undefined' ? localStorage.getItem('token') : null
+          if (stored) {
+            Cookies.set('token', stored, { expires: 1 })
+          }
+        }
+      },
     }
   )
 )

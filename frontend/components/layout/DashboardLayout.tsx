@@ -1,5 +1,5 @@
 'use client'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sidebar } from './Sidebar'
 import { useAuth } from '@/hooks/useAuth'
@@ -8,14 +8,23 @@ import { Loader2 } from 'lucide-react'
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, token } = useAuth()
   const router = useRouter()
+  // Track whether Zustand has finished rehydrating from localStorage
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (!token && !user) {
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    // Only redirect after hydration is complete and we confirm no token+user
+    if (hydrated && !token && !user) {
       router.push('/login')
     }
-  }, [token, user, router])
+  }, [hydrated, token, user, router])
 
-  if (!user) {
+  // Show spinner while Zustand is still rehydrating OR while we have a token
+  // but user object hasn't populated yet (e.g. first load)
+  if (!hydrated || (token && !user)) {
     return (
       <div className="min-h-screen bg-dark-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -26,6 +35,11 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     )
+  }
+
+  // After hydration: no token and no user → redirect handled above, render nothing
+  if (!user) {
+    return null
   }
 
   return (

@@ -23,10 +23,10 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ total: 0, completed: 0, pending: 0 })
 
   useEffect(() => {
-    historyAPI.list(1, 100).then((res) => {
+    historyAPI.list(1, 50).then((res) => {
       const scripts = res.data.scripts || []
       setStats({
-        total: scripts.length,
+        total: res.data.total ?? scripts.length,
         completed: scripts.filter((s: any) => s.status === 'completed').length,
         pending: scripts.filter((s: any) => s.status === 'processing' || s.status === 'pending').length,
       })

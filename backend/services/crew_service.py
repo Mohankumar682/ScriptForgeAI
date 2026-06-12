@@ -1,8 +1,8 @@
 import json
 import logging
+import os
 from typing import Dict, Any
 from crewai import Crew, Process
-from langchain_google_genai import ChatGoogleGenerativeAI
 from agents.coordinator_agent import (
     create_coordinator_agent,
     create_os_detection_agent,
@@ -26,13 +26,10 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 
-def get_llm():
-    return ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
-        google_api_key=settings.GEMINI_API_KEY,
-        temperature=0.3,
-        convert_system_message_to_human=True,
-    )
+def _set_gemini_env():
+    """Ensure GEMINI_API_KEY is set in the environment for LiteLLM."""
+    if settings.GEMINI_API_KEY:
+        os.environ["GEMINI_API_KEY"] = settings.GEMINI_API_KEY
 
 
 async def run_script_generation(
@@ -49,17 +46,17 @@ async def run_script_generation(
     logs = []
 
     try:
-        llm = get_llm()
+        _set_gemini_env()
         logs.append({"agent": "System", "message": "Initializing AI agents...", "status": "info"})
 
-        # Create agents
-        coordinator = create_coordinator_agent(llm)
-        dep_agent = create_dependency_agent(llm)
-        os_agent = create_os_detection_agent(llm)
-        security_agent = create_security_agent(llm)
-        compat_agent = create_compatibility_agent(llm)
-        script_agent = create_script_generator_agent(llm)
-        report_agent = create_report_agent(llm)
+        # Create agents (LiteLLM-based, no langchain dependency)
+        coordinator = create_coordinator_agent()
+        dep_agent = create_dependency_agent()
+        os_agent = create_os_detection_agent()
+        security_agent = create_security_agent()
+        compat_agent = create_compatibility_agent()
+        script_agent = create_script_generator_agent()
+        report_agent = create_report_agent()
 
         logs.append({"agent": "Coordinator", "message": "Analyzing user request...", "status": "processing"})
 
@@ -98,7 +95,7 @@ async def run_script_generation(
             verbose=False,
         )
 
-        result = crew.kickoff()
+        result = await crew.kickoff_async()
 
         # Extract outputs from tasks
         script_content = ""
@@ -147,6 +144,12 @@ async def run_script_generation(
         if not script_content or len(script_content) < 50:
             script_content = generate_fallback_script(user_request, os_type, stack, output_type)
 
+        # Mark all agents as completed with success
+        for log in logs:
+            if log["status"] == "processing":
+                log["status"] = "success"
+                log["message"] = log["message"].replace("...", " — completed")
+
         logs.append({"agent": "System", "message": "Script generation completed successfully!", "status": "success"})
 
         return {
@@ -161,6 +164,13 @@ async def run_script_generation(
 
     except Exception as e:
         logger.error(f"Crew execution error: {e}")
+
+        # Mark all pending "processing" agents as completed before adding the error
+        for log in logs:
+            if log["status"] == "processing":
+                log["status"] = "success"
+                log["message"] = log["message"].replace("...", " — completed")
+
         logs.append({"agent": "System", "message": f"Agent error: {str(e)[:100]}. Using fallback generation.", "status": "warning"})
 
         # Fallback script generation

@@ -329,9 +329,9 @@ function GeneratePageContent() {
                 summary={result.summary}
                 riskAnalysis={result.risk_analysis}
                 dependencyTree={result.dependency_tree}
-                osType={result.os_type}
-                outputType={result.output_type}
-                title={result.title}
+                osType={result.os_type || osType}
+                outputType={result.output_type || outputType}
+                title={result.title || title}
               />
             </motion.div>
           )}
