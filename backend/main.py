@@ -35,6 +35,7 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
     "https://scriptforgeai.vercel.app",
+    "https://script-forge-ai-murex.vercel.app",
     # Vercel preview deployments (wildcard handled via regex below)
 ] + _extra_origins
 
