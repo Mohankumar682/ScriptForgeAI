@@ -66,6 +66,8 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Email Address"
+              id="login-email"
+              name="email"
               type="email"
               placeholder="you@example.com"
               value={email}
@@ -76,6 +78,8 @@ export default function LoginPage() {
             />
             <Input
               label="Password"
+              id="login-password"
+              name="password"
               type={showPass ? 'text' : 'password'}
               placeholder="••••••••"
               value={password}

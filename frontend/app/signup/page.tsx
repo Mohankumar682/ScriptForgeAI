@@ -72,30 +72,39 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Username"
+              id="signup-username"
+              name="username"
               placeholder="devhero"
               value={form.username}
               onChange={set('username')}
               icon={<User className="w-4 h-4" />}
               error={errors.username}
+              autoComplete="username"
             />
             <Input
               label="Email Address"
+              id="signup-email"
+              name="email"
               type="email"
               placeholder="you@example.com"
               value={form.email}
               onChange={set('email')}
               icon={<Mail className="w-4 h-4" />}
               error={errors.email}
+              autoComplete="email"
             />
             <div>
               <Input
                 label="Password"
+                id="signup-password"
+                name="password"
                 type={showPass ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={form.password}
                 onChange={set('password')}
                 icon={<Lock className="w-4 h-4" />}
                 error={errors.password}
+                autoComplete="new-password"
                 rightElement={
                   <button type="button" onClick={() => setShowPass(!showPass)}>
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -115,12 +124,15 @@ export default function SignupPage() {
             </div>
             <Input
               label="Confirm Password"
+              id="signup-confirm"
+              name="confirm"
               type="password"
               placeholder="••••••••"
               value={form.confirm}
               onChange={set('confirm')}
               icon={<Lock className="w-4 h-4" />}
               error={errors.confirm}
+              autoComplete="new-password"
             />
 
             <Button type="submit" className="w-full mt-2" size="lg" isLoading={isLoading}>

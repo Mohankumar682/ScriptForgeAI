@@ -1,6 +1,6 @@
 'use client'
 import { clsx } from 'clsx'
-import { InputHTMLAttributes, ReactNode, forwardRef } from 'react'
+import { InputHTMLAttributes, ReactNode, forwardRef, useId } from 'react'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
@@ -10,11 +10,14 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, icon, rightElement, className, ...props }, ref) => {
+  ({ label, error, icon, rightElement, className, id, name, ...props }, ref) => {
+    const generatedId = useId()
+    const inputId = id || (name ? `field-${name}` : generatedId)
+
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label className="text-sm font-medium text-dark-300">
+          <label htmlFor={inputId} className="text-sm font-medium text-dark-300">
             {label}
           </label>
         )}
@@ -26,6 +29,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
+            name={name || inputId}
             className={clsx(
               'w-full bg-dark-900/80 border rounded-xl px-4 py-2.5 text-sm text-dark-100',
               'placeholder:text-dark-500 outline-none transition-all duration-200',
