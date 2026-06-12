@@ -7,7 +7,6 @@ export const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 120000, // 2 min for AI generation
-  withCredentials: true,
 })
 
 // Attach token to every request
