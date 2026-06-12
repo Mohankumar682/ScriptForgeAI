@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -9,13 +9,30 @@ import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://scriptforgeai.onrender.com'
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [serverReady, setServerReady] = useState(false)
   const { login, isLoading } = useAuth()
   const router = useRouter()
+
+  // Wake up Render backend on page load
+  useEffect(() => {
+    const wake = async () => {
+      try {
+        await fetch(`${API_URL}/health`)
+        setServerReady(true)
+      } catch {
+        // still let the user try — server may respond by then
+        setServerReady(true)
+      }
+    }
+    wake()
+  }, [])
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -61,6 +78,14 @@ export default function LoginPage() {
           <p className="text-dark-400 text-sm mt-1">Sign in to ScriptForge AI</p>
         </div>
 
+        {/* Server wake-up notice */}
+        {!serverReady && (
+          <div className="flex items-center gap-2 justify-center mb-4 text-xs text-dark-400">
+            <Loader2 className="w-3 h-3 animate-spin text-brand-400" />
+            <span>Waking up server, please wait a moment…</span>
+          </div>
+        )}
+
         {/* Form */}
         <div className="glass rounded-2xl p-8 border border-dark-700">
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -99,8 +124,9 @@ export default function LoginPage() {
               className="w-full mt-2"
               size="lg"
               isLoading={isLoading}
+              disabled={!serverReady || isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Signing in...' : !serverReady ? 'Connecting…' : 'Sign In'}
             </Button>
           </form>
 
@@ -115,7 +141,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-center text-xs text-dark-600 mt-6">
-          Demo: use any email + password (8+ chars)
+          Hosted on Render free tier — first load may take up to 30s
         </p>
       </motion.div>
     </div>

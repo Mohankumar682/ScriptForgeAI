@@ -1,13 +1,15 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Mail, Lock, User, Terminal, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { Mail, Lock, User, Terminal, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://scriptforgeai.onrender.com'
 
 const requirements = [
   { label: 'At least 8 characters', check: (p: string) => p.length >= 8 },
@@ -19,8 +21,22 @@ export default function SignupPage() {
   const [form, setForm] = useState({ username: '', email: '', password: '', confirm: '' })
   const [showPass, setShowPass] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [serverReady, setServerReady] = useState(false)
   const { signup, isLoading } = useAuth()
   const router = useRouter()
+
+  // Wake up Render backend on page load
+  useEffect(() => {
+    const wake = async () => {
+      try {
+        await fetch(`${API_URL}/health`)
+        setServerReady(true)
+      } catch {
+        setServerReady(true)
+      }
+    }
+    wake()
+  }, [])
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [k]: e.target.value }))
@@ -67,6 +83,13 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-dark-400 text-sm mt-1">Start generating scripts with AI</p>
         </div>
+
+        {!serverReady && (
+          <div className="flex items-center gap-2 justify-center mb-4 text-xs text-dark-400">
+            <Loader2 className="w-3 h-3 animate-spin text-brand-400" />
+            <span>Waking up server, please wait a moment…</span>
+          </div>
+        )}
 
         <div className="glass rounded-2xl p-8 border border-dark-700">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,8 +158,8 @@ export default function SignupPage() {
               autoComplete="new-password"
             />
 
-            <Button type="submit" className="w-full mt-2" size="lg" isLoading={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create Account'}
+            <Button type="submit" className="w-full mt-2" size="lg" isLoading={isLoading} disabled={!serverReady || isLoading}>
+              {isLoading ? 'Creating account...' : !serverReady ? 'Connecting…' : 'Create Account'}
             </Button>
           </form>
 
