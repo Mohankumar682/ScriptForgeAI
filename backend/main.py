@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 from database import engine, Base
 from api import auth, scripts, history, admin
 import uvicorn
+import os
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -26,12 +27,25 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Build allowed origins list from env var + known domains
+_extra = os.getenv("ALLOWED_ORIGINS", "")
+_extra_origins = [o.strip() for o in _extra.split(",") if o.strip()]
+
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://scriptforgeai.vercel.app",
+    # Vercel preview deployments (wildcard handled via regex below)
+] + _extra_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],          # dev-friendly; restrict per-domain in production
-    allow_credentials=False,       # must be False when allow_origins=["*"]
-    allow_methods=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.vercel\.app",   # covers all Vercel preview URLs
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
