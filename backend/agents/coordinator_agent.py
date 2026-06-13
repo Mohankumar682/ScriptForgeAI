@@ -2,102 +2,74 @@ from crewai import Agent
 
 LLM_MODEL = "gemini/gemini-2.5-flash"
 
+# Shared LLM config for all agents — concise, fast
+_AGENT_DEFAULTS = dict(
+    llm=LLM_MODEL,
+    verbose=False,        # was True — eliminates per-step stdout overhead
+    allow_delegation=False,
+    max_iter=1,           # was 3 — single pass, no retries
+    max_retry_limit=1,
+)
+
 
 def create_coordinator_agent() -> Agent:
     return Agent(
-        role="Coordinator Agent",
-        goal="Understand user requirements and orchestrate all other agents to produce a complete installation script package",
-        backstory="""You are the master coordinator of a multi-agent system specialized in generating 
-        installation scripts. You analyze user requests, understand their technical needs, and delegate 
-        tasks to specialized agents. You ensure all pieces come together into a cohesive, production-ready 
-        installation package.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=True,
-        max_iter=3,
+        role="Coordinator",
+        goal="Analyze user request and produce a concise installation plan",
+        backstory="Expert DevOps coordinator. Analyze requests and produce structured JSON plans. Be concise.",
+        **{**_AGENT_DEFAULTS, "allow_delegation": False},
     )
 
 
 def create_os_detection_agent() -> Agent:
     return Agent(
-        role="OS Detection & Optimization Agent",
-        goal="Generate OS-specific commands, detect appropriate package managers, and optimize installation flow for the target operating system",
-        backstory="""You are an expert in operating system internals and package management. You know 
-        the intricacies of Ubuntu/Debian apt, Windows winget/chocolatey/scoop, and macOS homebrew. 
-        You optimize installation sequences for maximum efficiency on each platform.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        role="OS Agent",
+        goal="Generate OS-specific package manager commands for the target platform",
+        backstory="OS and package manager expert for Ubuntu/Debian, Windows, and macOS. Return JSON only.",
+        **_AGENT_DEFAULTS,
     )
 
 
 def create_dependency_agent() -> Agent:
     return Agent(
-        role="Dependency Analysis Agent",
-        goal="Identify all required tools, resolve missing dependencies, and suggest additional useful tools for the requested setup",
-        backstory="""You are a dependency resolution expert with deep knowledge of software ecosystems. 
-        You can identify transitive dependencies, resolve version conflicts, and suggest complementary 
-        tools that enhance developer productivity for any given tech stack.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        role="Dependency Agent",
+        goal="List all required packages and versions for the requested stack",
+        backstory="Software dependency expert. Return a concise JSON list of required packages.",
+        **_AGENT_DEFAULTS,
     )
 
 
 def create_security_agent() -> Agent:
     return Agent(
-        role="Security Validation Agent",
-        goal="Detect unsafe commands, prevent malicious installations, warn about deprecated packages, and ensure scripts follow security best practices",
-        backstory="""You are a cybersecurity expert specializing in DevSecOps and secure software supply 
-        chains. You identify potential security risks in installation scripts, detect deprecated or 
-        vulnerable packages, and ensure all commands follow the principle of least privilege.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        role="Security Agent",
+        goal="Identify security risks in the installation and return safe alternatives",
+        backstory="DevSecOps expert. Return JSON with risk_level, warnings, and recommendations only.",
+        **_AGENT_DEFAULTS,
     )
 
 
 def create_compatibility_agent() -> Agent:
     return Agent(
         role="Compatibility Agent",
-        goal="Verify software compatibility, detect version conflicts, and validate the correct execution order of installation commands",
-        backstory="""You are a software compatibility expert who ensures different tools and frameworks 
-        work harmoniously together. You understand semantic versioning, compatibility matrices, and can 
-        predict and resolve conflicts before they cause installation failures.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        goal="Verify version compatibility and correct installation order",
+        backstory="Compatibility expert. Return JSON with conflicts and installation_order only.",
+        **_AGENT_DEFAULTS,
     )
 
 
 def create_script_generator_agent() -> Agent:
     return Agent(
-        role="Script Generator Agent",
-        goal="Generate clean, well-commented, executable installation scripts based on analysis from other agents",
-        backstory="""You are a master script writer who creates production-quality installation scripts. 
-        Your scripts include proper error handling, progress indicators, rollback capabilities, and 
-        comprehensive inline documentation. You write scripts that even junior developers can understand 
-        and trust.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        role="Script Generator",
+        goal="Write a complete, executable installation script",
+        backstory="Expert script writer. Write production-ready scripts with error handling and comments.",
+        **_AGENT_DEFAULTS,
     )
 
 
 def create_report_agent() -> Agent:
     return Agent(
-        role="Report Generation Agent",
-        goal="Generate comprehensive setup summaries, explain installed tools, provide troubleshooting steps, and create dependency trees",
-        backstory="""You are a technical documentation expert who transforms complex installation 
-        processes into clear, actionable documentation. You create reports that help users understand 
-        what was installed, why it was needed, and how to troubleshoot common issues.""",
-        llm=LLM_MODEL,
-        verbose=True,
-        allow_delegation=False,
-        max_iter=3,
+        role="Report Agent",
+        goal="Write a concise markdown installation guide",
+        backstory="Technical writer. Create a brief, clear installation guide in markdown.",
+        **_AGENT_DEFAULTS,
     )
